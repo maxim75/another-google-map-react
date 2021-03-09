@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState, createContext, useContext } from 'react'
 import * as React from 'react'
-
-export interface LatLng {
-  lat: number
-  lng: number
-}
+import CSS from 'csstype'
+import { BoundingBox, LatLng } from './Models'
 
 export const GoogleMapInstance = createContext(null)
 const isOnClient = typeof window !== 'undefined'
@@ -14,9 +11,11 @@ export function useGoogleMap() {
 }
 
 export interface GoogleMapProps {
-  mapPosition: LatLng
-  zoom: number
+  style: CSS.Properties
+  googleMapOptions: any
   gooleMapLoaderUrl: string
+  onBoundsChanged?: (boundingBox: BoundingBox) => void
+  onClick?: (latLng: LatLng, event: any) => void
   children: any
 }
 
@@ -36,7 +35,7 @@ function loadScript(url: string) {
 
 export const GoogleMap = (props: GoogleMapProps) => {
   const mapEl = useRef(null)
-  var [googleMapInstance, setGoogleMapInstance] = useState(null)
+  var [googleMapInstance, setGoogleMapInstance] = useState<any>(null)
 
   useEffect(() => {
     if (!isOnClient) return
@@ -45,25 +44,34 @@ export const GoogleMap = (props: GoogleMapProps) => {
 
       const google = (window as any).google
 
-      const map = new google.maps.Map(mapEl.current, {
-        center: { lat: props.mapPosition.lat, lng: props.mapPosition.lng },
-        zoom: props.zoom,
-        mapTypeId: 'roadmap',
-        streetViewControl: false,
-        mapId: '953062f907135420'
-      })
+      const map = new google.maps.Map(mapEl.current, props.googleMapOptions)
       setGoogleMapInstance(map)
+
+      map.addListener('bounds_changed', () => {
+        const mapBounds = map.getBounds()
+        const boundingBox = {
+          east: mapBounds.getNorthEast().lng(),
+          west: mapBounds.getSouthWest().lng(),
+          south: mapBounds.getSouthWest().lat(),
+          north: mapBounds.getNorthEast().lat()
+        }
+
+        props.onBoundsChanged && props.onBoundsChanged(boundingBox)
+      })
+      map.addListener('click', (e: any) => {
+        const latLng: LatLng = { lat: e.latLng.lat(), lng: e.latLng.lng() }
+        props.onClick && props.onClick(latLng, e)
+      })
     }
     load()
   }, [])
 
-  return <div>
-    <div
-      style={{ top: '0', height: '100vh', border: 'solid 1px Black' }}
-      ref={mapEl}
-    ></div>
-    <GoogleMapInstance.Provider value={googleMapInstance}>
-      {isOnClient && props.children}
-    </GoogleMapInstance.Provider>
-  </div>
+  return (
+    <div>
+      <div style={props.style} ref={mapEl}></div>
+      <GoogleMapInstance.Provider value={googleMapInstance}>
+        {isOnClient && props.children}
+      </GoogleMapInstance.Provider>
+    </div>
+  )
 }

@@ -23,17 +23,17 @@ function getGeoJson(features: any[]) {
   })
 }
 
-function getMapFeatureStyleFunc() {
+function getMapFeatureStyleFunc(feature: any) {
   return {
-    title: 'AAAA'
+    title: feature.getProperty('id')
   }
 }
 
 const App = () => {
   const [features, setFeatures] = React.useState<any[]>([])
+  const [boundingBox, setBoundingBox] = React.useState<any>(null)
 
   const add = () => {
-    console.log('here')
     setFeatures((prevFeatures) => [
       ...prevFeatures,
       {
@@ -51,20 +51,31 @@ const App = () => {
   React.useEffect(() => {
     const interval = setInterval(() => {
       add()
-    }, 50)
+    }, 500)
     return () => clearInterval(interval)
   }, [])
 
   return (
     <div>
+      <div>{JSON.stringify(boundingBox)}</div>
       <GoogleMap
+        googleMapOptions={{
+          center: { lat: -34, lng: 151 },
+          zoom: 10,
+          mapTypeId: 'roadmap',
+          streetViewControl: false,
+          mapId: '953062f907135420'
+        }}
+        style={{ border: 'solid 1px Black', height: 'calc(100vh - 200px)' }}
+        onClick={(latLng) => alert(JSON.stringify(latLng))}
+        onBoundsChanged={(boundingBox) => setBoundingBox(boundingBox)}
         gooleMapLoaderUrl={GOOGLE_MAP_LOADER_URL}
-        mapPosition={{ lat: -34, lng: 151 }}
-        zoom={10}
       >
         <GeoJsonLayer
           features={getGeoJson(features)}
-          onFeatureClick={() => {}}
+          onFeatureClick={(feature) => {
+            alert(`Feature ID=${feature.getProperty('id')} clicked`)
+          }}
           getMapFeatureStyleFunc={getMapFeatureStyleFunc}
         ></GeoJsonLayer>
       </GoogleMap>
