@@ -31,7 +31,8 @@ function getMapFeatureStyleFunc(feature: any) {
 
 const App = () => {
   const [features, setFeatures] = React.useState<any[]>([])
-  const [boundingBox, setBoundingBox] = React.useState<any>(null)
+  const [boundingBox, setBoundingBox] = React.useState<any>(null);
+  const [googleMap, setGoogleMap] = React.useState<any>(null)
 
   const add = () => {
     setFeatures((prevFeatures) => [
@@ -57,19 +58,19 @@ const App = () => {
 
   return (
     <div>
-      <div>{JSON.stringify(boundingBox)}</div>
+      <div>{JSON.stringify(boundingBox)} Google Map ref: {(googleMap !== null).toString()}</div>
       <GoogleMap
         googleMapOptions={{
           center: { lat: -34, lng: 151 },
           zoom: 10,
           mapTypeId: 'roadmap',
           streetViewControl: false,
-          mapId: '953062f907135420'
         }}
         style={{ border: 'solid 1px Black', height: 'calc(100vh - 200px)' }}
         onClick={(latLng) => alert(JSON.stringify(latLng))}
         onBoundsChanged={(boundingBox) => setBoundingBox(boundingBox)}
         gooleMapLoaderUrl={GOOGLE_MAP_LOADER_URL}
+        googleMapRef={(map) => setGoogleMap(map)}
       >
         <GeoJsonLayer
           features={getGeoJson(features)}

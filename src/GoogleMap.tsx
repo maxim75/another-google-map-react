@@ -16,6 +16,7 @@ export interface GoogleMapProps {
   gooleMapLoaderUrl: string
   onBoundsChanged?: (boundingBox: BoundingBox) => void
   onClick?: (latLng: LatLng, event: any) => void
+  googleMapRef?: (map: any) => void;
   children: any
 }
 
@@ -45,7 +46,11 @@ export const GoogleMap = (props: GoogleMapProps) => {
       const google = (window as any).google
 
       const map = new google.maps.Map(mapEl.current, props.googleMapOptions)
-      setGoogleMapInstance(map)
+      setGoogleMapInstance(map);
+      if(props.googleMapRef) {
+        props.googleMapRef(map);
+      }
+
 
       map.addListener('bounds_changed', () => {
         const mapBounds = map.getBounds()
