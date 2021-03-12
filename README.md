@@ -13,16 +13,24 @@ npm install --save another-google-map-react
 ## Usage
 
 ```tsx
-import React, { Component } from 'react'
+import React from 'react'
+import { GoogleMap, GeoJsonLayer } from 'another-google-map-react'
 
-import MyComponent from 'another-google-map-react'
-import 'another-google-map-react/dist/index.css'
+const GOOGLE_MAP_LOADER_URL = `https://maps.googleapis.com/maps/api/js?v=beta&libraries=places`
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
-}
+<GoogleMap
+  googleMapOptions={{
+    center: { lat: -34, lng: 151 },
+    zoom: 10,
+    mapTypeId: 'roadmap',
+    streetViewControl: false
+  }}
+  style={{}}
+  onClick={(latLng) => alert(JSON.stringify(latLng))}
+  onBoundsChanged={(boundingBox) => {}}
+  gooleMapLoaderUrl={GOOGLE_MAP_LOADER_URL}
+  googleMapRef={(map) => {}}
+></GoogleMap>
 ```
 
 ## License
