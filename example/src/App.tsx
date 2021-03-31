@@ -31,8 +31,10 @@ function getMapFeatureStyleFunc(feature: any) {
 
 const App = () => {
   const [features, setFeatures] = React.useState<any[]>([])
-  const [boundingBox, setBoundingBox] = React.useState<any>(null);
+  const [boundingBox, setBoundingBox] = React.useState<any>(null)
   const [googleMap, setGoogleMap] = React.useState<any>(null)
+  const [mapCenter, setMapCenter] = React.useState<any>({ lat: -34, lng: 151 })
+  const [mapZoom, setMapZoom] = React.useState<number>(10)
 
   const add = () => {
     setFeatures((prevFeatures) => [
@@ -58,13 +60,32 @@ const App = () => {
 
   return (
     <div>
-      <div>{JSON.stringify(boundingBox)} Google Map ref: {(googleMap !== null).toString()}</div>
+      <button
+        onClick={() => {
+          setMapCenter({ lat: -34, lng: 151 })
+          setMapZoom(10)
+        }}
+      >
+        Sydney
+      </button>
+      <button
+        onClick={() => {
+          setMapCenter({ lat: 50.4, lng: 30.4 })
+          setMapZoom(12)
+        }}
+      >
+        Kyiv
+      </button>
+      <div>
+        {JSON.stringify(boundingBox)} Google Map ref:{' '}
+        {(googleMap !== null).toString()}
+      </div>
       <GoogleMap
         googleMapOptions={{
-          center: { lat: -34, lng: 151 },
-          zoom: 10,
+          center: mapCenter,
+          zoom: mapZoom,
           mapTypeId: 'roadmap',
-          streetViewControl: false,
+          streetViewControl: false
         }}
         style={{ border: 'solid 1px Black', height: 'calc(100vh - 200px)' }}
         onClick={(latLng) => alert(JSON.stringify(latLng))}

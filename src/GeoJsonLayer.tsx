@@ -55,7 +55,7 @@ export function GeoJsonLayer(props: GeoJsonLayerProps) {
     mapData.setStyle(props.getMapFeatureStyleFunc);
   }
 
-  useEffect(() => {
+  const showFeatures = () => {
     if (!(window as any).google) return;
 
     const mapFeatures: any[] = [];
@@ -79,8 +79,15 @@ export function GeoJsonLayer(props: GeoJsonLayerProps) {
       type: "FeatureCollection",
       features: featuresToAdd,
     });
+  }
 
+  useEffect(() => {
+    showFeatures();
   }, [JSON.stringify(props.features)]);
+
+  useEffect(() => {
+    showFeatures();
+  }, []);
 
   return null;
 }

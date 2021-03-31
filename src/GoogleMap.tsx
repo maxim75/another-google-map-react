@@ -16,7 +16,7 @@ export interface GoogleMapProps {
   gooleMapLoaderUrl: string
   onBoundsChanged?: (boundingBox: BoundingBox) => void
   onClick?: (latLng: LatLng, event: any) => void
-  googleMapRef?: (map: any) => void;
+  googleMapRef?: (map: any) => void
   children: any
 }
 
@@ -36,21 +36,36 @@ function loadScript(url: string) {
 
 export const GoogleMap = (props: GoogleMapProps) => {
   const mapEl = useRef(null)
+
   var [googleMapInstance, setGoogleMapInstance] = useState<any>(null)
 
   useEffect(() => {
+    if (!googleMapInstance) return;
+
+    const google = (window as any).google;
+    const center = new google.maps.LatLng(
+      props.googleMapOptions.center.lat,
+      props.googleMapOptions.center.lng
+    )
+    googleMapInstance.panTo(center)
+  }, [props.googleMapOptions.center])
+
+  useEffect(() => {
+    if (!googleMapInstance) return;
+    googleMapInstance.setZoom(props.googleMapOptions.zoom)
+  }, [props.googleMapOptions.zoom])
+
+  useEffect(() => {
     if (!isOnClient) return
+
     async function load() {
       await loadScript(props.gooleMapLoaderUrl)
-
       const google = (window as any).google
-
       const map = new google.maps.Map(mapEl.current, props.googleMapOptions)
-      setGoogleMapInstance(map);
-      if(props.googleMapRef) {
-        props.googleMapRef(map);
+      setGoogleMapInstance(map)
+      if (props.googleMapRef) {
+        props.googleMapRef(map)
       }
-
 
       map.addListener('bounds_changed', () => {
         const mapBounds = map.getBounds()
