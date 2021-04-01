@@ -1,7 +1,7 @@
-import { ExampleComponent } from '.'
+import { GoogleMap } from '.'
 
 describe('ExampleComponent', () => {
   it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
+    expect(GoogleMap).toBeTruthy()
   })
 })

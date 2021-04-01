@@ -1,93 +1,102 @@
-import { useGoogleMap } from "./GoogleMap";
-import { useEffect, useState } from "react";
+import { useGoogleMap } from './GoogleMap'
+import { useEffect } from 'react'
+import { waitForCondition } from './Common'
 
 interface GeoJsonLayerProps {
-  getMapFeatureStyleFunc: any;
-  features: any[];
-  onFeatureClick: (feature: any) => void;
+  getMapFeatureStyleFunc: any
+  features: any[]
+  onFeatureClick: (feature: any) => void
 }
 
 function getKeyFromGeoJson(feature: any) {
-  return feature.properties.key;
+  return feature.properties.key
 }
 
 function getKeyFromFeature(feature: any) {
-  return feature.getProperty("key");
+  return feature.getProperty('key')
 }
 
 function getFeaturesToUpdate(mapFeatures: any[], newFeatures: any[]) {
-  const idsToRemove: any[] = [];
-  const existingIds: any[] = [];
-  const newIds: string[] = newFeatures.map((f: any) => getKeyFromGeoJson(f));
+  const idsToRemove: any[] = []
+  const existingIds: any[] = []
+  const newIds: string[] = newFeatures.map((f: any) => getKeyFromGeoJson(f))
 
   mapFeatures.forEach((feature: any) => {
-    const id = getKeyFromFeature(feature);
+    const id = getKeyFromFeature(feature)
     if (newIds.includes(id)) {
-      existingIds.push(id);
+      existingIds.push(id)
     } else {
-      idsToRemove.push(id);
+      idsToRemove.push(id)
     }
-  });
+  })
 
   const featuresToAdd = newFeatures.filter(
     (x: any) => !existingIds.includes(getKeyFromGeoJson(x))
-  );
+  )
 
-  return { featuresToAdd, idsToRemove };
+  return { featuresToAdd, idsToRemove }
 }
 
 export function GeoJsonLayer(props: GeoJsonLayerProps) {
-  var googleMap = useGoogleMap();
+  var googleMap: any = useGoogleMap()
 
-  let [mapData, setMapData] = useState<any>(null);
+  const getMapData = () => {
 
-  if ((window as any).google && mapData == null) {
-    mapData = new (window as any).google.maps.Data();
+    const mapData = googleMap.data //new (window as any).google.maps.Data()
+    if(!mapData.__IS_INITIALIZED__) {
 
-    mapData.addListener("click", function (event: any) {
-      if (props.onFeatureClick) {
-        props.onFeatureClick(event.feature);
-      }
-    });
+      mapData.addListener('click', function (event: any) {
+        if (props.onFeatureClick) {
+          props.onFeatureClick(event.feature)
+        }
+      })
+      mapData.setStyle(props.getMapFeatureStyleFunc)
+      mapData.__IS_INITIALIZED__ = true;
+    }
 
-    setMapData(mapData);
-    mapData.setMap(googleMap);
-    mapData.setStyle(props.getMapFeatureStyleFunc);
+
+    return mapData
   }
 
-  const showFeatures = () => {
-    if (!(window as any).google) return;
+  useEffect(() => {
+    if(!googleMap) return
+    (async () => {
+      await waitForCondition(() => (window as any).google, 200)
+      showFeatures()
+    })()
+  }, [googleMap])
 
-    const mapFeatures: any[] = [];
+  const showFeatures = () => {
+    if (!(window as any).google) return
+
+    const mapData = getMapData();
+    const mapFeatures: any[] = []
     mapData.forEach((feature: any) => {
-      mapFeatures.push(feature);
-    });
+      mapFeatures.push(feature)
+    })
 
     const { featuresToAdd, idsToRemove } = getFeaturesToUpdate(
       mapFeatures,
       props.features
-    );
+    )
 
     mapData.forEach((feature: any) => {
-      const key = getKeyFromFeature(feature);
+      const key = getKeyFromFeature(feature)
       if (idsToRemove.includes(key)) {
-        mapData.remove(feature);
+        mapData.remove(feature)
       }
-    });
+    })
 
     mapData.addGeoJson({
-      type: "FeatureCollection",
-      features: featuresToAdd,
-    });
+      type: 'FeatureCollection',
+      features: featuresToAdd
+    })
   }
 
   useEffect(() => {
-    showFeatures();
-  }, [JSON.stringify(props.features)]);
+    if(!googleMap) return
+    showFeatures()
+  }, [JSON.stringify(props.features)])
 
-  useEffect(() => {
-    showFeatures();
-  }, []);
-
-  return null;
+  return null
 }

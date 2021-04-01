@@ -2,9 +2,17 @@ import { useEffect, useRef, useState, createContext, useContext } from 'react'
 import * as React from 'react'
 import CSS from 'csstype'
 import { BoundingBox, LatLng } from './Models'
+import { waitForCondition } from './Common'
 
 export const GoogleMapInstance = createContext(null)
 const isOnClient = typeof window !== 'undefined'
+
+function getGoogleLatLngBounds(boundingBox: BoundingBox) {
+  return new (window as any).google.maps.LatLngBounds(
+    { lat: boundingBox.south, lng: boundingBox.west },
+    { lat: boundingBox.north, lng: boundingBox.east }
+  );
+}
 
 export function useGoogleMap() {
   return useContext(GoogleMapInstance)
@@ -17,7 +25,7 @@ export interface GoogleMapProps {
   onBoundsChanged?: (boundingBox: BoundingBox) => void
   onClick?: (latLng: LatLng, event: any) => void
   googleMapRef?: (map: any) => void
-  children: any
+  children?: any
 }
 
 function loadScript(url: string) {
@@ -40,9 +48,9 @@ export const GoogleMap = (props: GoogleMapProps) => {
   var [googleMapInstance, setGoogleMapInstance] = useState<any>(null)
 
   useEffect(() => {
-    if (!googleMapInstance) return;
+    if (!googleMapInstance) return
+    const google = (window as any).google
 
-    const google = (window as any).google;
     const center = new google.maps.LatLng(
       props.googleMapOptions.center.lat,
       props.googleMapOptions.center.lng
@@ -51,7 +59,13 @@ export const GoogleMap = (props: GoogleMapProps) => {
   }, [props.googleMapOptions.center])
 
   useEffect(() => {
-    if (!googleMapInstance) return;
+    if (!googleMapInstance) return
+    const bounds = getGoogleLatLngBounds(props.googleMapOptions.boundingBox)
+    googleMapInstance.fitBounds(bounds);
+  }, [props.googleMapOptions.boundingBox])
+
+  useEffect(() => {
+    if (!googleMapInstance) return
     googleMapInstance.setZoom(props.googleMapOptions.zoom)
   }, [props.googleMapOptions.zoom])
 
@@ -59,16 +73,30 @@ export const GoogleMap = (props: GoogleMapProps) => {
     if (!isOnClient) return
 
     async function load() {
-      await loadScript(props.gooleMapLoaderUrl)
+      if ((window as any).__LOADING_GOOGLEMAP__) {
+        await waitForCondition(() => (window as any).google, 100)
+      } else {
+        (window as any).__LOADING_GOOGLEMAP__ = true
+        await loadScript(props.gooleMapLoaderUrl)
+      }
+
       const google = (window as any).google
       const map = new google.maps.Map(mapEl.current, props.googleMapOptions)
       setGoogleMapInstance(map)
+
+      if(props.googleMapOptions.boundingBox) {
+        const bounds = getGoogleLatLngBounds(props.googleMapOptions.boundingBox);
+        map.fitBounds(bounds);
+      }
+
+
       if (props.googleMapRef) {
         props.googleMapRef(map)
       }
 
       map.addListener('bounds_changed', () => {
         const mapBounds = map.getBounds()
+        if(!mapBounds) return;
         const boundingBox = {
           east: mapBounds.getNorthEast().lng(),
           west: mapBounds.getSouthWest().lng(),
@@ -87,8 +115,7 @@ export const GoogleMap = (props: GoogleMapProps) => {
   }, [])
 
   return (
-    <div>
-      <div style={props.style} ref={mapEl}></div>
+    <div style={props.style} ref={mapEl}>
       <GoogleMapInstance.Provider value={googleMapInstance}>
         {isOnClient && props.children}
       </GoogleMapInstance.Provider>
