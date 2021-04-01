@@ -1,6 +1,7 @@
 import { useGoogleMap } from './GoogleMap'
 import { useEffect } from 'react'
 import { waitForCondition } from './Common'
+import React from "react";
 
 interface GeoJsonLayerProps {
   getMapFeatureStyleFunc: any
@@ -41,35 +42,24 @@ export function GeoJsonLayer(props: GeoJsonLayerProps) {
   var googleMap: any = useGoogleMap()
 
   const getMapData = () => {
-
     const mapData = googleMap.data //new (window as any).google.maps.Data()
-    if(!mapData.__IS_INITIALIZED__) {
-
+    if (!mapData.__IS_INITIALIZED__) {
       mapData.addListener('click', function (event: any) {
         if (props.onFeatureClick) {
           props.onFeatureClick(event.feature)
         }
       })
       mapData.setStyle(props.getMapFeatureStyleFunc)
-      mapData.__IS_INITIALIZED__ = true;
+      mapData.__IS_INITIALIZED__ = true
     }
-
 
     return mapData
   }
 
-  useEffect(() => {
-    if(!googleMap) return
-    (async () => {
-      await waitForCondition(() => (window as any).google, 200)
-      showFeatures()
-    })()
-  }, [googleMap])
-
   const showFeatures = () => {
     if (!(window as any).google) return
 
-    const mapData = getMapData();
+    const mapData = getMapData()
     const mapFeatures: any[] = []
     mapData.forEach((feature: any) => {
       mapFeatures.push(feature)
@@ -94,9 +84,19 @@ export function GeoJsonLayer(props: GeoJsonLayerProps) {
   }
 
   useEffect(() => {
-    if(!googleMap) return
+    if (!googleMap) return
+    ;(async () => {
+      await waitForCondition(() => (window as any).google, 200)
+      showFeatures()
+    })()
+
+  }, [googleMap])
+
+  useEffect(() => {
+    if (!googleMap) return
     showFeatures()
+
   }, [JSON.stringify(props.features)])
 
-  return null
+  return <div>here</div>
 }
