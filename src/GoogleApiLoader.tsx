@@ -23,17 +23,14 @@ export function GoogleApiLoader(props: GoogleApiLoaderProps) {
         await waitForCondition(() => (window as any).google, 100)
       } else {
         ;(window as any).__LOADING_GOOGLEMAP__ = true
-        console.log('loading')
         await loadScript(props.gooleMapLoaderUrl)
-        await waitForCondition(() => new Date().getSeconds() % 10 == 0, 100)
+        //await waitForCondition(() => new Date().getSeconds() % 10 == 0, 100)
       }
       setIsLoaded(true)
     })()
   }, [])
   return (
     <div>
-      <div>???{JSON.stringify(isLoaded)}</div>
-      {console.log("@@@@", (window as any).google, isOnClient, isLoaded, props.children)}
       {isOnClient && isLoaded && props.children}
     </div>
   )

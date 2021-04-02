@@ -45,7 +45,6 @@ export const GoogleMap = (props: GoogleMapProps) => {
 
   useEffect(() => {
     if (!googleMapInstance) return
-    console.log("HERE boundingBox", window["google"]);
     const bounds = getGoogleLatLngBounds(props.googleMapOptions.boundingBox)
     googleMapInstance.fitBounds(bounds);
   }, [props.googleMapOptions.boundingBox])
@@ -56,7 +55,6 @@ export const GoogleMap = (props: GoogleMapProps) => {
   }, [props.googleMapOptions.zoom])
 
   useEffect(() => {
-    console.log("HERE init", window["google"]);
     if (!isOnClient) return
 
     async function load() {

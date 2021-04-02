@@ -8,6 +8,7 @@ export default function Example4() {
   return (
     <>
       <PlaceSearch
+        useGoogleMap={true}
         onPlaceSelected={(place) => {
           console.log('place', place)
         }}
