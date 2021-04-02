@@ -10,7 +10,7 @@ const boundingBox: BoundingBox = {
 }
 
 export default function Example3() {
-  const [showMap, setShowMap] = React.useState(false)
+  const [showMap, setShowMap] = React.useState(true)
   return (
     <div>
       <button onClick={() => setShowMap((x) => !x)}>Toggle</button>

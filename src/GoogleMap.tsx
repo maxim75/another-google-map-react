@@ -2,10 +2,9 @@ import { useEffect, useRef, useState, createContext, useContext } from 'react'
 import * as React from 'react'
 import CSS from 'csstype'
 import { BoundingBox, LatLng } from './Models'
-import { waitForCondition } from './Common'
+import { isOnClient, loadScript, waitForCondition } from './Common'
 
 export const GoogleMapInstance = createContext(null)
-const isOnClient = typeof window !== 'undefined'
 
 function getGoogleLatLngBounds(boundingBox: BoundingBox) {
   return new (window as any).google.maps.LatLngBounds(
@@ -28,20 +27,6 @@ export interface GoogleMapProps {
   children?: any
 }
 
-function loadScript(url: string) {
-  if (isOnClient && typeof (window as any).google !== 'undefined') {
-    return Promise.resolve()
-  }
-
-  return new Promise((resolve) => {
-    const script = document.createElement('script')
-    script.type = 'text/javascript'
-    script.src = url
-    script.onload = resolve
-    document.head.appendChild(script)
-  })
-}
-
 export const GoogleMap = (props: GoogleMapProps) => {
   const mapEl = useRef(null)
 
@@ -60,6 +45,7 @@ export const GoogleMap = (props: GoogleMapProps) => {
 
   useEffect(() => {
     if (!googleMapInstance) return
+    console.log("HERE boundingBox", window["google"]);
     const bounds = getGoogleLatLngBounds(props.googleMapOptions.boundingBox)
     googleMapInstance.fitBounds(bounds);
   }, [props.googleMapOptions.boundingBox])
@@ -70,6 +56,7 @@ export const GoogleMap = (props: GoogleMapProps) => {
   }, [props.googleMapOptions.zoom])
 
   useEffect(() => {
+    console.log("HERE init", window["google"]);
     if (!isOnClient) return
 
     async function load() {
