@@ -1,7 +1,6 @@
 import { useGoogleMap } from './GoogleMap'
 import { useEffect } from 'react'
 import { waitForCondition } from './Common'
-import React from "react";
 
 interface GeoJsonLayerProps {
   getMapFeatureStyleFunc: any
@@ -42,7 +41,7 @@ export function GeoJsonLayer(props: GeoJsonLayerProps) {
   var googleMap: any = useGoogleMap()
 
   const getMapData = () => {
-    const mapData = googleMap.data //new (window as any).google.maps.Data()
+    const mapData = googleMap.data 
     if (!mapData.__IS_INITIALIZED__) {
       mapData.addListener('click', function (event: any) {
         if (props.onFeatureClick) {
@@ -98,5 +97,5 @@ export function GeoJsonLayer(props: GeoJsonLayerProps) {
 
   }, [JSON.stringify(props.features)])
 
-  return <div>here</div>
+  return null;
 }

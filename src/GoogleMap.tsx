@@ -3,6 +3,7 @@ import * as React from 'react'
 import CSS from 'csstype'
 import { BoundingBox, LatLng } from './Models'
 import { isOnClient, loadScript, waitForCondition } from './Common'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 
 export const GoogleMapInstance = createContext(null)
 
@@ -43,11 +44,11 @@ export const GoogleMap = (props: GoogleMapProps) => {
     googleMapInstance.panTo(center)
   }, [props.googleMapOptions.center])
 
-  useEffect(() => {
+  useDeepCompareEffect(() => { 
     if (!googleMapInstance) return
     const bounds = getGoogleLatLngBounds(props.googleMapOptions.boundingBox)
     googleMapInstance.fitBounds(bounds);
-  }, [props.googleMapOptions.boundingBox])
+  }, [props.googleMapOptions.boundingBox || {}])
 
   useEffect(() => {
     if (!googleMapInstance) return
