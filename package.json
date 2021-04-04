@@ -1,6 +1,6 @@
 {
   "name": "another-google-map-react",
-  "version": "1.1.24",
+  "version": "1.1.25",
   "description": "Google Map react component. Supports GeoJSON overlay",
   "author": "Maksym Kozlenko",
   "license": "MIT",
@@ -73,5 +73,8 @@
     "typescript",
     "geojson",
     "react-component"
-  ]
+  ],
+  "dependencies": {
+    "use-deep-compare-effect": "^1.6.1"
+  }
 }
